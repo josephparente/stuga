@@ -1,0 +1,186 @@
+<style type="text/css">
+  		label {
+          display: inline-block;
+          font-weight: normal;
+        }
+  
+		.calc-header {
+		background:#000;
+		border-radius:5px 5px 0 0;
+		text-align:center;
+		height:48px;
+		}
+
+		.calc-body {
+		border:1px solid #000;
+		box-sizing:border-box;
+		text-align:center;
+		padding:16px;
+		}
+
+		.calc-body p {
+		font-family:Open Sans;
+		font-size:12px;
+		text-align:center;
+		color:#000;
+		}
+
+		.calc-header-title {
+		font-family:Montserrat;
+		font-weight:700;
+		font-size:14px;
+		line-height:48px;
+		text-transform:uppercase;
+		color:#FFF;
+		margin-left:-48px;
+		}
+
+		.calc-header-title:before {
+		content:"";
+		display:block;
+          background:url({{ 'icon-calc.png' | asset_url }}) no-repeat;
+		width:24px;
+		height:24px;
+		float:left;
+		margin:12px;
+		}
+
+		.calc-body-intro {
+		font-family:Open Sans;
+		font-size:14px!important;
+		color:#000;
+		}
+
+		.calc-body-title {
+		font-family:Open Sans;
+		font-weight:700;
+		font-size:14px!important;
+		text-align:center;
+		color:#000;
+		}
+
+		.calc-container-sqft {
+		display:inline-block;
+		}
+
+		.calc-field {
+        display: inline-block !important;
+		width:160px !important;
+		height:32px;
+		border:.5px solid #000;
+		box-sizing:border-box;
+		border-radius:5px;
+		text-align:center;
+        margin: auto !important;
+        padding: 0 !important;
+		}
+
+		.calc-field-label {
+		font-family:Open Sans;
+		font-size:12px;
+		text-align:left;
+		color:#000;
+		}
+
+		.calc-field-sqft {
+		margin-left:27px !important;
+		}
+
+		.calc-icon-refresh:after {
+		content:"";
+		display:inline-block;
+		background:url({{ 'icon-refresh.png' | asset_url }}) no-repeat;
+		width:21px;
+		height:21px;
+		margin-left:6px;
+		line-height:32px;
+		vertical-align:middle;
+		}
+
+		.calc-container-checkbox {
+		text-align:left;
+		margin-left:27px !important;
+		margin-top:4px;
+		}
+
+		.calc-checkbox {
+		width:16px;
+		height:16px;
+		border:.5px solid #000;
+		box-sizing:border-box;
+		border-radius:5px;
+		vertical-align:middle;
+		}
+
+		.calc-field-quantity {
+		margin-left:68px !important;
+		}
+
+		.calc-field-quantity-label {
+		display:inline-block;
+		font-family:Open Sans;
+		font-style:normal;
+		font-weight:400;
+		line-height:12px;
+		font-size:12px;
+		color:#000;
+		vertical-align:middle;
+		text-align:left;
+		}
+
+		@media only screen and (max-width: 500px) {
+			.calc-field-quantity {
+				margin-left:0 !important;
+			}
+		}
+	</style>
+
+<input type="hidden" id="per-unit" name="per-unit" value="{{ product.metafields.carton-volume.per-unit  }}" />
+<div class="calc-header">
+	<span class="calc-header-title">Calculate Your Square Footage</span>
+</div>
+<div class="calc-body">
+	<p class="calc-body-intro">How many square feet do you need?</p>
+	<div class="calc-container-sqft">
+		<input id="sqft" name="sqft" type="text" class="calc-field calc-field-sqft" placeholder="0" onchange="productCalc()" /><a href="javascript:productCalc()"><span class="calc-icon-refresh"></span></a>
+		<div class="calc-container-checkbox"><input id="overage" name="overage" type="checkbox" class="calc-checkbox" checked onClick="overageHandler(overage);" /><label for="overage" class="calc-field-label">Include overage</label></div>
+	</div>
+  <p>You will need to purchase a total of <strong><span id="text-sqft">1,000</span></strong> sq. ft. in <strong><span id="text-quantity">42</span></strong> boxes<span id="overagelabel">&nbsp;including 8% recommended overage</span>.</p>
+	<p class="calc-body-title">Order Quantity:</p>
+	<input id="quantity" name="quantity" type="text" class="calc-field calc-field-quantity" placeholder="0"  onchange="productCalc()" /> <span class="calc-field-quantity-label">{{ product.metafields.carton-volume.per-unit }} sq. ft.<br/>per unit</span>
+</div>
+
+<script>
+function productCalc(){
+    actualSqft = 0;
+    quantity = 0;
+    var sqft = document.getElementById("sqft");
+    sqft = parseInt(sqft.value || 0);
+    var perUnit = document.getElementById("per-unit");
+    perUnit = parseFloat(perUnit.value);
+    var overage = document.getElementById("overage");
+    if(overage.checked == true){
+        overage = (8 / 100) + 1;
+        sqft = sqft * overage;
+    }
+    if(sqft % perUnit < .5){
+        quantity = Math.floor(sqft / perUnit);
+    } else {
+        quantity = Math.ceil(sqft / perUnit);
+    }
+    actualSqft = Math.round((quantity * perUnit) * 100) / 100;
+    document.getElementById('quantity').value=quantity;
+	document.getElementById('text-sqft').innerHTML = actualSqft;
+	document.getElementById('text-quantity').innerHTML = quantity;
+}
+function overageHandler(overage){
+	productCalc();
+	var overage = document.getElementById("overage");
+  	var overagelabel = document.getElementById("overagelabel");
+  	if (overage.checked == true) {
+		overagelabel.style.display = "inline-block";
+    } else {
+		overagelabel.style.display = "none";
+	}
+}
+</script>
